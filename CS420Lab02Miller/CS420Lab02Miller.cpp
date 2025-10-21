@@ -3,26 +3,36 @@
 #include <vector>
 #include <thread>
 #include <iostream>
-#include <algorithm>>
+#include <fstream>
+#include <algorithm>
+
+#include "ThreadFunctions.h" 
 
 using namespace std;
 
-void func()
+void fileToMemoryTransfer(char* fileName, char** data, size_t& numOfBytes);
+
+int main(int argc, char *argv[])
 {
-	cout << "**Inside thread" << this_thread::get_id() << "!" << endl;
-}
-
-int main()
-{
-	int numthreads = thread::hardware_concurrency();
-	vector<thread> workers;
-
-	cout << "This computer has " << numthreads << " threads." << endl;
-
-	for (int i = 0; i < numthreads; i++)
-		workers.push_back(thread(func));
-
-	for_each(workers.begin(),workers.end(),[](thread& t){t.join();});
 
 	return 0;
+}
+
+//Reads data from file to RAM
+void fileToMemoryTransfer(char* fileName, char** data, size_t& numOfBytes) {
+	streampos begin, end;
+	ifstream inFile(fileName, ios::in | ios::binary | ios::ate);
+	if (!inFile)
+	{
+		cerr << "Cannot open " << fileName << endl;
+		inFile.close();
+		exit(1);
+	}
+	size_t size = inFile.tellg();
+	char* buffer = new char[size];
+	inFile.seekg(0, ios::beg);
+	inFile.read(buffer, size);
+	inFile.close();
+	*data = buffer;
+	numOfBytes = size;
 }
