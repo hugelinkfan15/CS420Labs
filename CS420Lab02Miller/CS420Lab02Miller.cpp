@@ -7,32 +7,24 @@
 #include <algorithm>
 
 #include "ThreadFunctions.h" 
+#include "HelperFunctions.h"
 
 using namespace std;
 
-void fileToMemoryTransfer(char* fileName, char** data, size_t& numOfBytes);
-
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
+	char* fileData = nullptr;
+	size_t fileSize;
+	array<int,256> histogram = { 0 };
+	fileToMemoryTransfer(argv[1], &fileData, fileSize);
+
+	for (int i = 0; i < fileSize; i ++) 
+	{
+		histogram[fileData[i]]++;
+	}
+
+	printHisto(histogram);
+
 
 	return 0;
-}
-
-//Reads data from file to RAM
-void fileToMemoryTransfer(char* fileName, char** data, size_t& numOfBytes) {
-	streampos begin, end;
-	ifstream inFile(fileName, ios::in | ios::binary | ios::ate);
-	if (!inFile)
-	{
-		cerr << "Cannot open " << fileName << endl;
-		inFile.close();
-		exit(1);
-	}
-	size_t size = inFile.tellg();
-	char* buffer = new char[size];
-	inFile.seekg(0, ios::beg);
-	inFile.read(buffer, size);
-	inFile.close();
-	*data = buffer;
-	numOfBytes = size;
 }
