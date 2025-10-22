@@ -23,15 +23,18 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ThreadFunctions.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="HelperFunctions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Test1.txt">
+      <Filter>Text Files</Filter>
+    </Text>
+    <Text Include="Test2.txt">
+      <Filter>Text Files</Filter>
+    </Text>
+    <Text Include="Test3.txt">
       <Filter>Text Files</Filter>
     </Text>
   </ItemGroup>

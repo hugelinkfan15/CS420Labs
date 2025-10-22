@@ -1,4 +1,10 @@
 #pragma once
+#include <array>
+#include <fstream>
+#include <iostream>
+#include <string>
+
+using namespace std;
 
 //Reads data from file to RAM
 void fileToMemoryTransfer(string fileName, char** data, size_t& numOfBytes) {

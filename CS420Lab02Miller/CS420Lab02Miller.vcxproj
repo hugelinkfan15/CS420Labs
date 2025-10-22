@@ -127,12 +127,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="HelperFunctions.h" />
-    <ClInclude Include="ThreadFunctions.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Test1.txt">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Text>
+    <Text Include="Test2.txt" />
+    <Text Include="Test3.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
