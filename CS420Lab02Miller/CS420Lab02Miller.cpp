@@ -18,7 +18,7 @@ using namespace std;
 int main(int argc, char* argv[])
 {
 	int numThreads = thread::hardware_concurrency();
-	vector<thread> globalWorkers;
+	vector<thread> workers;
 
 	char* fileData = nullptr;
 	size_t fileSize;
@@ -48,7 +48,7 @@ int main(int argc, char* argv[])
 	//Using a global histogram
 	for (int i = 0; i < numThreads; i++)
 	{
-		globalWorkers.push_back(
+		workers.push_back(
 			thread([&,startPos]()
 				{
 					for (int i = startPos; i < (startPos + sectionSize); i++)
@@ -56,9 +56,8 @@ int main(int argc, char* argv[])
 						histogram[(unsigned char)fileData[i]]++;
 					}
 
-					if (remainder && !onRemainder)
+					if (remainder && !onRemainder.exchange(true))
 					{
-						onRemainder = 1;
 						for (int i = (sectionSize * numThreads); i < fileSize; i++)
 						{
 							histogram[(unsigned char)fileData[i]]++;
@@ -68,10 +67,12 @@ int main(int argc, char* argv[])
 		startPos+= sectionSize;
 	}
 	
-	for_each(globalWorkers.begin(), globalWorkers.end(),
+	for_each(workers.begin(), workers.end(),
 		[](thread& t) { t.join(); });
 
-	cout << "Run with one global histogram" << endl;
+	workers.clear();
+
+	std::cout << "Run with one global histogram" << endl;
 	printHisto(histogram);
 
 	//ready variables for next set of threads
@@ -79,12 +80,11 @@ int main(int argc, char* argv[])
 		h.store(0);
 	startPos = 0;
 	onRemainder = 0;
-	vector<thread> localWorkers;
 
 	//Using local histograms
 	for (int i = 0; i < numThreads; i++)
 	{
-		localWorkers.push_back(
+		workers.push_back(
 			thread([&, startPos]()
 				{
 					array<unsigned long, 256> lHistogram = { 0 };
@@ -94,9 +94,8 @@ int main(int argc, char* argv[])
 						lHistogram[(unsigned char)fileData[i]]++;
 					}
 
-					if (remainder && !onRemainder)
+					if (remainder && !onRemainder.exchange(true))
 					{
-						onRemainder = 1;
 						for (int i = (sectionSize * numThreads); i < fileSize; i++)
 						{
 							lHistogram[(unsigned char)fileData[i]]++;
@@ -112,10 +111,12 @@ int main(int argc, char* argv[])
 		startPos += sectionSize;
 	}
 
-	for_each(localWorkers.begin(), localWorkers.end(),
+	for_each(workers.begin(), workers.end(),
 		[](thread& t) { t.join(); });
 
-	cout << "Run with local histograms" << endl;
+	workers.clear();
+
+	std::cout << "Run with local histograms" << endl;
 	printHisto(histogram);
 
 	return 0;
