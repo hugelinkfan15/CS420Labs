@@ -1,7 +1,7 @@
 // Kayden Miller
 //CS420
 //Lab 02
-//Two methofs of computing a histogram of all ASCII characters in a file using threads
+//Two methods of computing a histogram of all ASCII characters in a file using threads
 
 #include <vector>
 #include <thread>
@@ -23,7 +23,9 @@ int main(int argc, char* argv[])
 	char* fileData = nullptr;
 	size_t fileSize;
 
-	array<atomic<unsigned long>,256> histogram = { 0 };
+	array<atomic<unsigned long>, 256> histogram;
+	for (auto& h : histogram)
+		h.store(0);
 
 	int sectionSize = 0;
 	int startPos = 0;
@@ -51,8 +53,7 @@ int main(int argc, char* argv[])
 				{
 					for (int i = startPos; i < (startPos + sectionSize); i++)
 					{
-						char current = fileData[i];
-						histogram[current]++;
+						histogram[(unsigned char)fileData[i]]++;
 					}
 
 					if (remainder && !onRemainder)
@@ -60,8 +61,7 @@ int main(int argc, char* argv[])
 						onRemainder = 1;
 						for (int i = (sectionSize * numThreads); i < fileSize; i++)
 						{
-							char current = fileData[i];
-							histogram[current]++;
+							histogram[(unsigned char)fileData[i]]++;
 						}
 					}
 				}));
@@ -75,7 +75,8 @@ int main(int argc, char* argv[])
 	printHisto(histogram);
 
 	//ready variables for next set of threads
-	histogram.fill(0);
+	for (auto& h : histogram)
+		h.store(0);
 	startPos = 0;
 	onRemainder = 0;
 	vector<thread> localWorkers;
@@ -86,11 +87,11 @@ int main(int argc, char* argv[])
 		localWorkers.push_back(
 			thread([&, startPos]()
 				{
-					array<int, 256> lHistogram = { 0 };
+					array<unsigned long, 256> lHistogram = { 0 };
 
 					for (int i = startPos; i < (startPos + sectionSize); i++)
 					{
-						lHistogram[fileData[i]]++;
+						lHistogram[(unsigned char)fileData[i]]++;
 					}
 
 					if (remainder && !onRemainder)
@@ -98,7 +99,7 @@ int main(int argc, char* argv[])
 						onRemainder = 1;
 						for (int i = (sectionSize * numThreads); i < fileSize; i++)
 						{
-							lHistogram[fileData[i]]++;
+							lHistogram[(unsigned char)fileData[i]]++;
 						}
 					}
 

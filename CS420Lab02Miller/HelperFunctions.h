@@ -26,7 +26,7 @@ void fileToMemoryTransfer(string fileName, char** data, size_t& numOfBytes) {
 	numOfBytes = size;
 }
 
-void printHisto(array<atomic<unsigned long>,256>& graph)
+void printHisto(const array<atomic<unsigned long>,256>& graph)
 {
 	for (int i = 0; i < 256; i++)
 	{
