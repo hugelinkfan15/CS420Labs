@@ -1,5 +1,6 @@
 #pragma once
 #include <array>
+#include <atomic>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -25,7 +26,7 @@ void fileToMemoryTransfer(string fileName, char** data, size_t& numOfBytes) {
 	numOfBytes = size;
 }
 
-void printHisto(array<int,256>& graph)
+void printHisto(array<atomic<unsigned long>,256>& graph)
 {
 	for (int i = 0; i < 256; i++)
 	{

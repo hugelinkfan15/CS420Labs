@@ -1,7 +1,7 @@
 // Kayden Miller
 //CS420
 //Lab 02
-//Computing a Histogram of all ASICC characters in a text file using threads
+//Two methofs of computing a histogram of all ASCII characters in a file using threads
 
 #include <vector>
 #include <thread>
@@ -13,9 +13,6 @@
 
 #include "HelperFunctions.h"
 
-#define LOCK 1;
-#define UNLOCK 0;
-
 using namespace std;
 
 int main(int argc, char* argv[])
@@ -26,8 +23,7 @@ int main(int argc, char* argv[])
 	char* fileData = nullptr;
 	size_t fileSize;
 
-	array<int,256> histogram = { 0 };
-	array<atomic<bool>, 256> locks = { 0 };
+	array<atomic<unsigned long>,256> histogram = { 0 };
 
 	int sectionSize = 0;
 	int startPos = 0;
@@ -56,24 +52,16 @@ int main(int argc, char* argv[])
 					for (int i = startPos; i < (startPos + sectionSize); i++)
 					{
 						char current = fileData[i];
-						while(locks[current] == 1){}
-
-						locks[current] = LOCK;
 						histogram[current]++;
-						locks[current] = UNLOCK;
 					}
 
 					if (remainder && !onRemainder)
 					{
-						onRemainder = LOCK;
+						onRemainder = 1;
 						for (int i = (sectionSize * numThreads); i < fileSize; i++)
 						{
 							char current = fileData[i];
-							while (locks[current] == 1) {}
-
-							locks[current] = LOCK;
 							histogram[current]++;
-							locks[current] = UNLOCK;
 						}
 					}
 				}));
@@ -89,10 +77,10 @@ int main(int argc, char* argv[])
 	//ready variables for next set of threads
 	histogram.fill(0);
 	startPos = 0;
-	onRemainder = UNLOCK;
+	onRemainder = 0;
 	vector<thread> localWorkers;
 
-	//Threads using local histograms
+	//Using local histograms
 	for (int i = 0; i < numThreads; i++)
 	{
 		localWorkers.push_back(
@@ -107,7 +95,7 @@ int main(int argc, char* argv[])
 
 					if (remainder && !onRemainder)
 					{
-						onRemainder = LOCK;
+						onRemainder = 1;
 						for (int i = (sectionSize * numThreads); i < fileSize; i++)
 						{
 							lHistogram[fileData[i]]++;
@@ -116,10 +104,7 @@ int main(int argc, char* argv[])
 
 					for (int i =0; i<256 ; i++)
 					{
-						while (locks[i] == 1) {}
-						locks[i] = LOCK;
 						histogram[i] += lHistogram[i];
-						locks[i] = UNLOCK;
 					}
 					
 				}));
@@ -131,7 +116,6 @@ int main(int argc, char* argv[])
 
 	cout << "Run with local histograms" << endl;
 	printHisto(histogram);
-
 
 	return 0;
 }
