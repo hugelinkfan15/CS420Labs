@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
 		histogram[(unsigned char)fileData[i]]++;
 	}*/
 
-	//Using a shared histogram
+	//Using a global histogram
 	for (int i = 0; i < numThreads; i++)
 	{
 		workers.push_back(
@@ -83,8 +83,13 @@ int main(int argc, char* argv[])
 	for_each(workers.begin(), workers.end(),
 		[](thread& t) { t.join(); });
 
-
+	cout << "Run with one global histogram" << endl;
 	printHisto(histogram);
+
+	//empty histogram before running the next threads
+	histogram.empty();
+
+	//Threads using local histograms
 
 
 	return 0;
