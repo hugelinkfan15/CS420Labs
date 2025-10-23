@@ -21,7 +21,7 @@ using namespace std;
 int main(int argc, char* argv[])
 {
 	int numThreads = thread::hardware_concurrency();
-	vector<thread> workers;
+	vector<thread> globalWorkers;
 
 	char* fileData = nullptr;
 	size_t fileSize;
@@ -50,7 +50,7 @@ int main(int argc, char* argv[])
 	//Using a global histogram
 	for (int i = 0; i < numThreads; i++)
 	{
-		workers.push_back(
+		globalWorkers.push_back(
 			thread([&,startPos]()
 				{
 					for (int i = startPos; i < (startPos + sectionSize); i++)
@@ -80,16 +80,57 @@ int main(int argc, char* argv[])
 		startPos+= sectionSize;
 	}
 	
-	for_each(workers.begin(), workers.end(),
+	for_each(globalWorkers.begin(), globalWorkers.end(),
 		[](thread& t) { t.join(); });
 
 	cout << "Run with one global histogram" << endl;
 	printHisto(histogram);
 
-	//empty histogram before running the next threads
-	histogram.empty();
+	//ready variables for next set of threads
+	histogram.fill(0);
+	startPos = 0;
+	onRemainder = UNLOCK;
+	vector<thread> localWorkers;
 
 	//Threads using local histograms
+	for (int i = 0; i < numThreads; i++)
+	{
+		localWorkers.push_back(
+			thread([&, startPos]()
+				{
+					array<int, 256> lHistogram = { 0 };
+
+					for (int i = startPos; i < (startPos + sectionSize); i++)
+					{
+						lHistogram[fileData[i]]++;
+					}
+
+					if (remainder && !onRemainder)
+					{
+						onRemainder = LOCK;
+						for (int i = (sectionSize * numThreads); i < fileSize; i++)
+						{
+							lHistogram[fileData[i]]++;
+						}
+					}
+
+					for (int i =0; i<256 ; i++)
+					{
+						while (locks[i] == 1) {}
+						locks[i] = LOCK;
+						histogram[i] += lHistogram[i];
+						locks[i] = UNLOCK;
+					}
+					
+				}));
+		startPos += sectionSize;
+	}
+
+	for_each(localWorkers.begin(), localWorkers.end(),
+		[](thread& t) { t.join(); });
+
+	cout << "Run with local histograms" << endl;
+	printHisto(histogram);
 
 
 	return 0;
