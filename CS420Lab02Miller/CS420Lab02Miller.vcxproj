@@ -129,11 +129,14 @@
     <ClInclude Include="HelperFunctions.h" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="Test1.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Text>
-    <Text Include="Test2.txt" />
-    <Text Include="Test3.txt" />
+    <Text Include="..\x64\Debug\Test1.txt" />
+    <Text Include="..\x64\Debug\Test2.txt" />
+    <Text Include="..\x64\Debug\Test3.txt" />
+    <Text Include="..\x64\Debug\Test5.txt" />
+    <Text Include="..\x64\Debug\Test6.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="..\x64\Debug\Test4.wav" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
